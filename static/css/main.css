@@ -1,0 +1,118 @@
+/* Blue Computer Custom Design System */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+    --bg-dark: #070b14;
+    --card-dark: #0f172a;
+    --card-hover: #162238;
+    --accent-cyan: #00f2fe;
+    --accent-blue: #2b8aff;
+    --khqr-red: #d32f2f;
+    --border-glow: rgba(0, 242, 254, 0.15);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #070b14;
+}
+::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+}
+
+/* Glass Panels */
+.glass-panel {
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card-interactive {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-card-interactive:hover {
+    background: rgba(22, 34, 56, 0.85);
+    border-color: rgba(43, 138, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -8px rgba(0, 242, 254, 0.12);
+}
+
+/* Glowing Neon Buttons */
+.btn-neon {
+    background: linear-gradient(135deg, #2b8aff 0%, #00f2fe 100%);
+    box-shadow: 0 4px 14px 0 rgba(0, 242, 254, 0.35);
+    transition: all 0.2s ease;
+}
+.btn-neon:hover {
+    box-shadow: 0 6px 20px 0 rgba(0, 242, 254, 0.55);
+    transform: translateY(-1px);
+}
+.btn-neon:active {
+    transform: translateY(1px);
+}
+
+/* POS Numpad Grid */
+.numpad-btn {
+    background: #131d31;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.15s ease;
+}
+.numpad-btn:hover {
+    background: #1e2d4a;
+    border-color: rgba(0, 242, 254, 0.3);
+}
+.numpad-btn:active {
+    background: #2b8aff;
+    color: white;
+}
+
+/* Thermal POS Receipt Formatting for Printing */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #thermal-receipt-printable, #thermal-receipt-printable * {
+        visibility: visible;
+    }
+    #thermal-receipt-printable {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 80mm;
+        margin: 0;
+        padding: 4mm;
+        background: white !important;
+        color: black !important;
+        font-family: 'JetBrains Mono', 'Courier New', monospace;
+        font-size: 11px;
+    }
+}
+
+.receipt-paper {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    background: #ffffff;
+    color: #111827;
+    width: 320px;
+    padding: 16px;
+    border-radius: 4px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+/* Pulse Glow Animation */
+@keyframes glow-pulse {
+    0%, 100% { opacity: 0.8; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.03); }
+}
+.pulse-glow {
+    animation: glow-pulse 2s infinite ease-in-out;
+}

@@ -1,0 +1,1 @@
+# Blue Computer Django Project

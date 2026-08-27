@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="km" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABA Pay - KHQR Mobile Checkout</title>
+    <!-- Google Fonts & Tailwind CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Kantumruy+Pro:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Kantumruy Pro', 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#001736] text-white min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="w-full max-w-sm bg-[#00254f] border border-blue-400/30 rounded-3xl p-6 space-y-5 shadow-2xl relative overflow-hidden">
+        <div class="absolute -right-10 -top-10 w-40 h-40 bg-cyan-400/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <!-- ABA Pay Header -->
+        <div class="flex items-center justify-between border-b border-blue-800/80 pb-3">
+            <div class="flex items-center gap-2">
+                <div class="w-9 h-9 rounded-xl bg-[#e1251b] flex items-center justify-center font-black text-white text-xs tracking-tighter shadow-md">
+                    ABA
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-sm text-white">ABA Mobile Pay</h3>
+                    <p class="text-[10px] text-cyan-300">National Bakong KHQR Gateway</p>
+                </div>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-rose-600 text-white font-extrabold text-[10px]">KHQR</span>
+        </div>
+
+        <!-- Payment Details Card -->
+        <div class="bg-[#001736]/90 border border-blue-900 rounded-2xl p-4 text-center space-y-2">
+            <span class="text-[11px] text-slate-400 font-medium">ទូទាត់ជូនអាជីវករ (Paying to):</span>
+            <h2 class="text-base font-extrabold text-cyan-300">BLUE COMPUTER CO., LTD.</h2>
+            <p class="text-[10px] text-slate-400">Phnom Penh Retail & Online Store</p>
+
+            <div class="py-3 border-y border-blue-900/80 my-2">
+                <span class="text-[10px] text-slate-400 block uppercase font-mono tracking-wider">ចំនួនទឹកប្រាក់ (Total Amount)</span>
+                <div class="text-3xl font-black text-white font-mono mt-0.5">${{ order.total_amount }}</div>
+                <div class="text-xs text-cyan-400 font-mono mt-0.5">≈ {{ khr_amount }} KHR (៛)</div>
+            </div>
+
+            <div class="text-left space-y-1 text-xs font-mono text-slate-300 pt-1">
+                <div class="flex justify-between text-slate-400"><span>លេខវិក្កយបត្រ (Bill No):</span><span class="text-white font-bold">{{ order.order_number }}</span></div>
+                <div class="flex justify-between text-slate-400"><span>ប្រភពគណនី (From):</span><span class="text-cyan-300">001 234 567 (Savings USD)</span></div>
+                <div class="flex justify-between text-slate-400"><span>ស្ថានភាព (Status):</span><span id="mobile-order-status" class="text-amber-400 font-bold">{{ order.payment_status }}</span></div>
+            </div>
+        </div>
+
+        <!-- Action / Approval Button -->
+        <div id="payment-action-box" class="space-y-2">
+            {% if order.payment_status == 'PAID' %}
+                <div class="p-4 rounded-2xl bg-emerald-950/80 border border-emerald-500/50 text-center text-emerald-300 space-y-1">
+                    <i data-lucide="check-circle-2" class="w-8 h-8 mx-auto text-emerald-400"></i>
+                    <h4 class="font-bold text-sm">បានទូទាត់រួចរាល់! (Already Paid)</h4>
+                    <p class="text-xs text-slate-300">Transaction Ref: {{ order.payment_reference }}</p>
+                </div>
+            {% else %}
+                <button onclick="approvePayment()" id="approve-btn" class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25 transition-all transform active:scale-95">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                    <span>អនុម័តការទូទាត់ (Approve Pay ${{ order.total_amount }})</span>
+                </button>
+            {% endif %}
+            <p class="text-[10px] text-center text-slate-400">Powered by National Bank of Cambodia (NBC) Bakong</p>
+        </div>
+
+        <!-- Success Notification Box (Initially Hidden) -->
+        <div id="success-box" class="hidden p-4 rounded-2xl bg-emerald-950/90 border border-emerald-500 text-center text-emerald-200 space-y-2">
+            <i data-lucide="check-circle-2" class="w-10 h-10 mx-auto text-emerald-400 animate-bounce"></i>
+            <h3 class="font-extrabold text-base text-white">ការទូទាត់ជោគជ័យ! (Success)</h3>
+            <p class="text-xs text-slate-300">ហាង Blue Computer បានទទួលការទូទាត់រួចរាល់ និងកំពុងចេញវិក្កយបត្រ។</p>
+            <div class="text-[11px] font-mono text-cyan-300" id="txn-ref-display"></div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        async function approvePayment() {
+            const btn = document.getElementById('approve-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = 'កំពុងដំណើរការទូទាត់ (Processing...)...';
+            }
+
+            try {
+                const res = await fetch('/api/payment/khqr/approve/{{ order.order_number }}/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Payment failed');
+
+                document.getElementById('payment-action-box').classList.add('hidden');
+                const successBox = document.getElementById('success-box');
+                document.getElementById('txn-ref-display').innerText = `Ref: ${data.payment_reference}`;
+                successBox.classList.remove('hidden');
+                lucide.createIcons();
+            } catch (err) {
+                alert('Payment error: ' + err.message);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'អនុម័តការទូទាត់ (Approve Payment)';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

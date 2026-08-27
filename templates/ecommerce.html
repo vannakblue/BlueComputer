@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+
+{% block title %}Blue Computer - Official Flagship Smartphone & Tech Store (Phnom Penh){% endblock %}
+
+{% block header_actions %}
+<!-- Cart Button -->
+<button id="cart-toggle-btn" class="relative flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-blue-600/20 border border-blue-500/40 text-blue-300 hover:bg-blue-600 hover:text-white transition-all">
+    <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+    <span class="text-xs font-bold" data-i18n="nav_cart">Cart</span>
+    <span id="cart-badge-count" class="w-5 h-5 rounded-full bg-cyan-400 text-slate-950 font-extrabold text-[11px] flex items-center justify-center">0</span>
+</button>
+{% endblock %}
+
+{% block content %}
+<div class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 space-y-8">
+
+    <!-- Hero Promotional Banner -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 border border-blue-500/30 p-6 md:p-10 shadow-2xl shadow-blue-950/50">
+        <div class="absolute -right-10 -top-20 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none"></div>
+        <div class="absolute left-1/3 bottom-0 w-96 h-32 bg-blue-600/15 blur-3xl pointer-events-none"></div>
+        
+        <div class="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+            <div class="md:col-span-7 space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-semibold tracking-wide">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <span data-i18n="hero_badge">100% Genuine Apple & Samsung • Official Cambodia Warranty</span>
+                </div>
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                    <span data-i18n="hero_title_1">Upgrade to Next-Gen</span> <br>
+                    <span class="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-300 bg-clip-text text-transparent" data-i18n="hero_title_2">Power & Elegance</span>
+                </h1>
+                <p class="text-slate-300 text-sm md:text-base max-w-lg leading-relaxed" data-i18n="hero_desc">
+                    Explore iPhone 15 Pro Titanium, Galaxy S24 Ultra AI, and authentic fast-charging accessories. Fast 1-hour delivery across Phnom Penh.
+                </p>
+                <div class="flex flex-wrap items-center gap-3 pt-2">
+                    <button onclick="scrollToProducts()" class="btn-neon px-6 py-3 rounded-xl font-bold text-slate-950 text-sm flex items-center gap-2 shadow-lg">
+                        <span data-i18n="hero_shop_now">Shop Catalog</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                    <a href="/pos/" class="px-5 py-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-sm font-semibold border border-slate-700 flex items-center gap-2 transition-all">
+                        <i data-lucide="scan-barcode" class="w-4 h-4 text-cyan-400"></i>
+                        <span data-i18n="hero_switch_pos">Switch to Cashier POS</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="md:col-span-5 flex justify-center">
+                <div class="relative p-3 rounded-2xl bg-gradient-to-b from-slate-800/80 to-slate-900/90 border border-slate-700/60 shadow-2xl backdrop-blur-md max-w-xs text-center">
+                    <div class="absolute -top-3 right-3 px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-extrabold uppercase tracking-wider" data-i18n="hot_deal">
+                        Hot Deal
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600&auto=format&fit=crop&q=80" alt="iPhone 15 Pro Max" class="w-full h-48 object-cover rounded-xl mb-3 shadow-inner">
+                    <div class="text-left px-2">
+                        <h4 class="font-bold text-sm text-white">iPhone 15 Pro Max 256GB</h4>
+                        <p class="text-xs text-slate-400">Natural Titanium • A17 Pro</p>
+                        <div class="flex items-center justify-between mt-2">
+                            <div>
+                                <span class="text-lg font-black text-cyan-400">$1,159</span>
+                                <span class="text-xs text-slate-500 line-through ml-1.5">$1,199</span>
+                            </div>
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" data-i18n="in_stock">In Stock</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div id="catalog-section" class="glass-panel p-4 lg:p-5 rounded-2xl space-y-4">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Search Input -->
+            <div class="relative w-full md:w-96">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="catalog-search" data-i18n-placeholder="search_catalog_placeholder" placeholder="Search by phone name, SKU, Apple, Samsung..." 
+                       class="w-full pl-10 pr-4 py-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all">
+            </div>
+
+            <!-- Brand Filter Tabs -->
+            <div id="brand-filters" class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
+                <button data-brand="all" class="brand-filter-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-blue-600 text-white shadow-md shadow-blue-600/30" data-i18n="all_brands">All Brands</button>
+                <button data-brand="apple" class="brand-filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all">Apple</button>
+                <button data-brand="samsung" class="brand-filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all">Samsung</button>
+                <button data-brand="xiaomi" class="brand-filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all">Xiaomi</button>
+                <button data-brand="anker" class="brand-filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all">Anker</button>
+                <button data-brand="spigen" class="brand-filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all">Spigen</button>
+            </div>
+
+            <!-- Sort dropdown -->
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                <span class="text-xs text-slate-400 whitespace-nowrap" data-i18n="sort_by">Sort by:</span>
+                <select id="catalog-sort" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-400">
+                    <option value="-created_at" data-i18n="sort_newest">Newest First</option>
+                    <option value="retail_price" data-i18n="sort_price_low">Price: Low to High</option>
+                    <option value="-retail_price" data-i18n="sort_price_high">Price: High to Low</option>
+                    <option value="name" data-i18n="sort_name">Name A-Z</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Category Pills -->
+        <div id="category-filters" class="flex items-center gap-2 overflow-x-auto pt-2 border-t border-slate-800 text-xs">
+            <button data-category="all" class="category-filter-btn px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/30" data-i18n="all_categories">All Categories</button>
+            <button data-category="smartphones" class="category-filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800" data-i18n="cat_smartphones">Smartphones</button>
+            <button data-category="tablets" class="category-filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800" data-i18n="cat_tablets">Tablets & iPads</button>
+            <button data-category="audio-power" class="category-filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800" data-i18n="cat_chargers">Chargers & Power</button>
+            <button data-category="cases-protection" class="category-filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800" data-i18n="cat_cases">Cases & Glass</button>
+        </div>
+    </div>
+
+    <!-- Product Grid Section -->
+    <div class="space-y-4">
+        <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <span data-i18n="catalog_title">Available In-Store & Online</span>
+                <span id="product-count-badge" class="text-xs font-mono font-normal text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md">Loading...</span>
+            </h3>
+            <span class="text-xs text-emerald-400 font-mono flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span data-i18n="stock_synced_live">Stock synced live with retail POS</span>
+            </span>
+        </div>
+
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div class="col-span-full py-16 text-center text-slate-500">
+                <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-2 text-cyan-400"></i>
+                <p>Loading Blue Computer catalog...</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Product Details Modal -->
+<div id="product-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative space-y-6 shadow-2xl">
+        <button onclick="closeProductModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+            &times;
+        </button>
+        <div id="modal-product-content"></div>
+    </div>
+</div>
+
+<!-- Sliding Cart Drawer -->
+<div id="cart-drawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-slate-900/95 border-l border-slate-800 backdrop-blur-xl shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    <!-- Cart Header -->
+    <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <i data-lucide="shopping-bag" class="w-5 h-5 text-cyan-400"></i>
+            <h3 class="font-bold text-white text-base" data-i18n="your_cart">Your Cart</h3>
+            <span id="drawer-item-count" class="text-xs bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-full font-mono">0 items</span>
+        </div>
+        <button id="close-cart-btn" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+            &times;
+        </button>
+    </div>
+
+    <!-- Cart Items List -->
+    <div id="cart-items-container" class="flex-1 overflow-y-auto p-5 space-y-3"></div>
+
+    <!-- Cart Summary & Checkout Trigger -->
+    <div class="p-5 border-t border-slate-800 bg-slate-950/60 space-y-3">
+        <div class="space-y-1.5 text-xs text-slate-400">
+            <div class="flex justify-between">
+                <span data-i18n="subtotal">Subtotal:</span>
+                <span id="drawer-subtotal" class="font-bold text-white">$0.00</span>
+            </div>
+            <div class="flex justify-between">
+                <span data-i18n="delivery_fee">Phnom Penh Delivery:</span>
+                <span id="drawer-delivery-fee" class="text-emerald-400 font-bold">$1.50</span>
+            </div>
+            <div class="flex justify-between text-sm font-extrabold text-white pt-2 border-t border-slate-800">
+                <span data-i18n="total_amount">Total Amount:</span>
+                <span id="drawer-total" class="text-cyan-400 text-base">$0.00</span>
+            </div>
+        </div>
+
+        <button id="open-checkout-btn" class="w-full btn-neon py-3 rounded-xl font-bold text-slate-950 text-sm flex items-center justify-center gap-2">
+            <span data-i18n="proceed_checkout">Proceed to Checkout</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Checkout Modal -->
+<div id="checkout-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-[#0b1120] border border-blue-500/30 rounded-3xl max-w-xl w-full max-h-[95vh] overflow-y-auto p-6 md:p-8 space-y-6 shadow-2xl relative">
+        <button onclick="closeCheckoutModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+            &times;
+        </button>
+
+        <div class="border-b border-slate-800 pb-4">
+            <div class="flex items-center gap-2 text-cyan-400 text-xs font-bold uppercase tracking-wider mb-1">
+                <i data-lucide="truck" class="w-4 h-4"></i>
+                <span data-i18n="hero_badge">Fast Express Delivery</span>
+            </div>
+            <h2 class="text-xl font-extrabold text-white" data-i18n="complete_order">Complete Your Order</h2>
+            <p class="text-xs text-slate-400" data-i18n="checkout_desc">In-store staff will pack and prepare your device immediately.</p>
+        </div>
+
+        <!-- Checkout Form -->
+        <form id="checkout-form" class="space-y-4 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="font-semibold text-slate-300" data-i18n="recipient_name">Recipient Full Name *</label>
+                    <input type="text" id="cust-name" required placeholder="e.g. Sokha Chan" 
+                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="font-semibold text-slate-300" data-i18n="phone_number">Phone Number * (Telegram)</label>
+                    <input type="tel" id="cust-phone" required placeholder="e.g. 012 888 999" 
+                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="font-semibold text-slate-300" data-i18n="city_province">City / Province *</label>
+                    <select id="cust-city" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-cyan-400 focus:outline-none">
+                        <option value="Phnom Penh" selected>Phnom Penh</option>
+                        <option value="Kandal">Kandal</option>
+                        <option value="Siem Reap">Siem Reap</option>
+                        <option value="Battambang">Battambang</option>
+                        <option value="Sihanoukville">Sihanoukville</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="font-semibold text-slate-300" data-i18n="district_khan">Khan / District in Phnom Penh *</label>
+                    <select id="cust-district" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-cyan-400 focus:outline-none">
+                        <option value="Chamkarmon / BKK">Chamkarmon / Boeung Keng Kang</option>
+                        <option value="Daun Penh">Daun Penh</option>
+                        <option value="Toul Kork">Toul Kork</option>
+                        <option value="Sen Sok">Sen Sok</option>
+                        <option value="Chroy Changvar">Chroy Changvar</option>
+                        <option value="Mean Chey">Mean Chey</option>
+                        <option value="Chbar Ampov">Chbar Ampov</option>
+                        <option value="Prampi Makara">Prampi Makara</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="font-semibold text-slate-300" data-i18n="street_address">Street, House No., Building / Landmark *</label>
+                <input type="text" id="cust-address" required placeholder="e.g. St. 310, House #42, near Boeung Keng Kang Market" 
+                       class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none">
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="space-y-2 pt-2 border-t border-slate-800">
+                <label class="font-bold text-white block" data-i18n="payment_method">Choose Payment Method:</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <label class="payment-method-card flex flex-col items-center gap-1.5 p-3 rounded-xl border border-rose-500/50 bg-rose-950/20 text-center cursor-pointer hover:border-rose-400 transition-all">
+                        <input type="radio" name="payment_method" value="ABA_PAY" checked class="hidden">
+                        <span class="w-6 h-6 rounded-full bg-rose-600 text-white font-extrabold text-[10px] flex items-center justify-center">ABA</span>
+                        <span class="font-bold text-white text-[11px]" data-i18n="aba_pay_khqr">ABA Pay (KHQR)</span>
+                    </label>
+                    <label class="payment-method-card flex flex-col items-center gap-1.5 p-3 rounded-xl border border-slate-700 bg-slate-900 text-center cursor-pointer hover:border-slate-600 transition-all">
+                        <input type="radio" name="payment_method" value="COD" class="hidden">
+                        <i data-lucide="banknote" class="w-5 h-5 text-emerald-400"></i>
+                        <span class="font-bold text-slate-300 text-[11px]" data-i18n="cash_on_delivery">Cash on Delivery</span>
+                    </label>
+                    <label class="payment-method-card flex flex-col items-center gap-1.5 p-3 rounded-xl border border-slate-700 bg-slate-900 text-center cursor-pointer hover:border-slate-600 transition-all">
+                        <input type="radio" name="payment_method" value="CREDIT_CARD" class="hidden">
+                        <i data-lucide="credit-card" class="w-5 h-5 text-blue-400"></i>
+                        <span class="font-bold text-slate-300 text-[11px]" data-i18n="credit_card">Credit Card</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Order Total Recap -->
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                <div>
+                    <span class="text-slate-400 block text-[11px]" data-i18n="total_amount">Final Total with Delivery:</span>
+                    <span id="checkout-final-total" class="text-xl font-extrabold text-cyan-400">$0.00</span>
+                </div>
+                <button type="submit" id="submit-order-btn" class="btn-neon px-6 py-3 rounded-xl font-bold text-slate-950 text-xs flex items-center gap-2">
+                    <span id="submit-btn-text" data-i18n="confirm_and_pay">Confirm & Pay</span>
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ABA KHQR Payment Modal -->
+<div id="aba-qr-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-white text-slate-900 rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl relative overflow-hidden">
+        <button onclick="closeAbaModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">&times;</button>
+        
+        <!-- Red KHQR Ribbon -->
+        <div class="bg-[#e1251b] -mx-6 -mt-6 px-5 py-2.5 flex items-center justify-between text-white shadow-md">
+            <span class="font-black text-sm tracking-wider">KHQR</span>
+            <span class="text-[10px] font-semibold tracking-wide">BAKONG / ABA PAY</span>
+        </div>
+
+        <div class="space-y-1 text-left pt-1">
+            <span class="text-[9px] text-slate-500 uppercase block font-semibold">Merchant / អ្នកទទួល:</span>
+            <h4 class="font-extrabold text-sm text-slate-900 leading-tight">BLUE COMPUTER CO., LTD.</h4>
+        </div>
+
+        <!-- Dynamic QR Container -->
+        <div class="p-3 bg-slate-50 border-2 border-dashed border-red-200 rounded-2xl inline-block">
+            <div class="relative w-48 h-48 mx-auto bg-white p-2 rounded-xl border border-slate-200 flex items-center justify-center shadow-inner">
+                <img id="ecommerce-khqr-img" src="" alt="ABA KHQR" class="w-full h-full object-contain">
+                <div id="ecommerce-khqr-loading" class="absolute inset-0 bg-white/90 flex flex-col items-center justify-center text-xs text-slate-600 gap-1.5">
+                    <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-cyan-500"></i>
+                    <span>Generating KHQR...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-0.5">
+            <div class="text-2xl font-black text-slate-900 font-mono" id="qr-total-amount">$0.00</div>
+            <div class="text-xs text-slate-500 font-mono font-semibold" id="qr-total-khr-amount">≈ 0 KHR</div>
+            <p class="text-[11px] text-slate-400 pt-1">Bill Reference: <span id="qr-order-num" class="font-mono font-bold text-slate-700">BC-...</span></p>
+        </div>
+
+        <!-- Status & Timer -->
+        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-[10px] font-mono text-slate-500">
+            <span class="flex items-center gap-1 text-emerald-600 font-bold">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                <span data-i18n="awaiting_scan">Awaiting Scan</span>
+            </span>
+            <span><span data-i18n="expires_in">Expires:</span> <b id="ecommerce-khqr-timer" class="text-slate-800">03:00</b></span>
+        </div>
+
+        <!-- Mobile direct scan simulation link -->
+        <div class="flex flex-col gap-2 pt-1">
+            <a id="ecommerce-mobile-scan-link" href="#" target="_blank" class="w-full py-2.5 rounded-xl bg-[#00254f] hover:bg-[#001736] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md">
+                <i data-lucide="smartphone" class="w-4 h-4 text-cyan-400"></i>
+                <span>Open / Test Customer Mobile Scan Screen</span>
+            </a>
+            <button onclick="simulateCustomerPaymentSuccess()" class="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold">
+                Simulate Direct Approval
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Order Success Modal -->
+<div id="order-success-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-emerald-500/40 rounded-3xl max-w-md w-full p-8 text-center space-y-5 shadow-2xl">
+        <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
+            <i data-lucide="check-circle-2" class="w-8 h-8"></i>
+        </div>
+        <div class="space-y-1">
+            <h3 class="text-2xl font-extrabold text-white">Order Received!</h3>
+            <p class="text-xs text-slate-400">Your order has been transmitted live to Blue Computer in-store POS.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-left space-y-1.5 text-xs font-mono">
+            <div class="flex justify-between text-slate-400">
+                <span>Order Reference:</span>
+                <span id="success-order-num" class="font-bold text-cyan-400">BC-...</span>
+            </div>
+            <div class="flex justify-between text-slate-400">
+                <span>Status:</span>
+                <span class="text-amber-400 font-bold">Packing in Store</span>
+            </div>
+            <div class="flex justify-between text-slate-400">
+                <span>Delivery To:</span>
+                <span id="success-district" class="text-white">Phnom Penh</span>
+            </div>
+        </div>
+        <div class="flex flex-col gap-2">
+            <a id="track-order-link" href="#" class="btn-neon py-3 rounded-xl font-bold text-slate-950 text-xs flex items-center justify-center gap-2">
+                <i data-lucide="map-pin" class="w-4 h-4"></i>
+                <span data-i18n="nav_tracking">Track Live Order Status</span>
+            </a>
+            <button onclick="closeSuccessModal()" class="py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold">
+                Continue Shopping
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/ecommerce.js"></script>
+{% endblock %}

@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+
+{% block title %}Blue Computer - In-Store POS Station #01 (Phnom Penh){% endblock %}
+
+{% block header_actions %}
+<!-- Shift Ledger Button -->
+<button onclick="openShiftLedgerModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 text-xs font-semibold border border-slate-700 transition-all">
+    <i data-lucide="calculator" class="w-4 h-4 text-amber-400"></i>
+    <span data-i18n="shift_ledger_btn">Daily Shift Ledger</span>
+</button>
+
+<!-- Online Fulfillment Drawer Trigger -->
+<button onclick="toggleFulfillmentDrawer()" class="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-900/60 text-xs font-bold transition-all">
+    <i data-lucide="bell" class="w-4 h-4 text-cyan-400 animate-bounce"></i>
+    <span data-i18n="online_orders_btn">Online Orders</span>
+    <span id="pos-online-order-count" class="px-1.5 py-0.5 rounded-full text-[10px] bg-red-500 text-white font-mono">0</span>
+</button>
+{% endblock %}
+
+{% block content %}
+<div class="flex-1 max-w-[1600px] w-full mx-auto p-3 lg:p-5 grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+    <!-- Left / Center Section: Barcode Scanner & Product Catalog Grid (8 Cols) -->
+    <div class="lg:col-span-7 xl:col-span-8 flex flex-col space-y-4">
+        
+        <!-- Barcode Scanner Bar & Quick Search -->
+        <div class="glass-panel p-4 rounded-2xl flex flex-col md:flex-row items-center gap-3">
+            <div class="relative flex-1 w-full">
+                <div class="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-cyan-400">
+                    <i data-lucide="barcode" class="w-5 h-5"></i>
+                </div>
+                <input type="text" id="pos-barcode-input" autofocus 
+                       data-i18n-placeholder="scan_barcode_placeholder"
+                       placeholder="Scan barcode / IMEI or search product..." 
+                       class="w-full pl-12 pr-28 py-3 bg-slate-950 border border-cyan-500/40 rounded-xl text-sm font-mono text-cyan-300 placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 transition-all">
+                <button onclick="handleBarcodeScanTrigger()" class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-xs font-mono font-bold border border-cyan-500/30">
+                    <span data-i18n="scan_enter_btn">Scan / Enter</span>
+                </button>
+            </div>
+
+            <!-- Quick Demo Barcode Simulation Buttons -->
+            <div class="flex items-center gap-1.5 shrink-0 overflow-x-auto w-full md:w-auto text-[11px] font-mono">
+                <span class="text-slate-500 whitespace-nowrap" data-i18n="simulate_scan_label">Simulate Scan:</span>
+                <button onclick="simulateScan('195949038234')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700" title="iPhone 15 Pro Max Barcode">📱 iPhone 15 PM</button>
+                <button onclick="simulateScan('880609538491')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700" title="Galaxy S24 Ultra Barcode">📱 S24 Ultra</button>
+                <button onclick="simulateScan('880989674891')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700" title="Spigen Case Barcode">🛡️ Spigen Case</button>
+            </div>
+        </div>
+
+        <!-- Category & Brand Filter Tabs -->
+        <div class="flex items-center justify-between gap-2 overflow-x-auto pb-1 text-xs">
+            <div id="pos-category-filters" class="flex items-center gap-1.5 shrink-0">
+                <button data-cat="all" class="pos-cat-btn px-3 py-1.5 rounded-xl font-bold bg-blue-600 text-white shadow-sm" data-i18n="all_categories">All</button>
+                <button data-cat="smartphones" class="pos-cat-btn px-3 py-1.5 rounded-xl font-medium text-slate-400 bg-slate-900 border border-slate-800 hover:text-white" data-i18n="cat_smartphones">Smartphones</button>
+                <button data-cat="tablets" class="pos-cat-btn px-3 py-1.5 rounded-xl font-medium text-slate-400 bg-slate-900 border border-slate-800 hover:text-white" data-i18n="cat_tablets">Tablets</button>
+                <button data-cat="audio-power" class="pos-cat-btn px-3 py-1.5 rounded-xl font-medium text-slate-400 bg-slate-900 border border-slate-800 hover:text-white" data-i18n="cat_chargers">Chargers & Power</button>
+                <button data-cat="cases-protection" class="pos-cat-btn px-3 py-1.5 rounded-xl font-medium text-slate-400 bg-slate-900 border border-slate-800 hover:text-white" data-i18n="cat_cases">Cases & Glass</button>
+            </div>
+
+            <div class="text-slate-400 font-mono text-[11px] shrink-0">
+                <span id="pos-product-count">0 items loaded</span>
+            </div>
+        </div>
+
+        <!-- Product Tiles Grid -->
+        <div id="pos-product-grid" class="flex-1 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-1">
+            <!-- Injected via JS -->
+        </div>
+
+    </div>
+
+    <!-- Right Section: Virtual POS Cart & Fast Checkout Panel (4-5 Cols) -->
+    <div class="lg:col-span-5 xl:col-span-4 flex flex-col h-[calc(100vh-100px)] glass-panel rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+        
+        <!-- Cart Top Info -->
+        <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold">
+                    <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm text-white" data-i18n="virtual_cart">POS Virtual Cart</h3>
+                    <p class="text-[11px] text-slate-400"><span data-i18n="pos_cashier">Cashier:</span> <span class="text-cyan-400 font-medium">Bopha (Station 01)</span></p>
+                </div>
+            </div>
+            <button onclick="clearPosCart()" class="text-[11px] text-rose-400 hover:underline flex items-center gap-1 font-semibold">
+                <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+                <span data-i18n="clear_cart">Clear</span>
+            </button>
+        </div>
+
+        <!-- Virtual Cart Items List -->
+        <div id="pos-cart-items" class="flex-1 overflow-y-auto py-3 space-y-2.5 my-1">
+            <div class="h-full flex flex-col items-center justify-center text-slate-500 text-xs text-center p-4">
+                <i data-lucide="scan-barcode" class="w-12 h-12 text-slate-700 mb-2 stroke-1"></i>
+                <p class="font-semibold text-slate-400" data-i18n="empty_cart">Virtual Cart is Empty</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">Scan a barcode or click any product tile.</p>
+            </div>
+        </div>
+
+        <!-- Quick Upsell Accessories Bar -->
+        <div class="py-2 px-3 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-1.5">
+            <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-400 font-semibold flex items-center gap-1">
+                    <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
+                    <span data-i18n="quick_upsells">Quick Upsell Add-ons:</span>
+                </span>
+            </div>
+            <div class="flex items-center gap-1.5 overflow-x-auto text-[11px] scrollbar-none">
+                <button onclick="quickAddAccessory('apple-20w-usb-c-power-adapter')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 shrink-0">+ 20W Adapter ($25)</button>
+                <button onclick="quickAddAccessory('spigen-ultra-hybrid-magfit-iphone-15-pro-max')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 shrink-0">+ Spigen Case ($29)</button>
+                <button onclick="quickAddAccessory('belkin-ultraglass-2-iphone-15-pro-max')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 shrink-0">+ Screen Glass ($19)</button>
+            </div>
+        </div>
+
+        <!-- Cart Calculation & Discounts -->
+        <div class="pt-3 border-t border-slate-800 space-y-2 text-xs">
+            <div class="flex items-center justify-between text-slate-400">
+                <span data-i18n="subtotal">Subtotal:</span>
+                <span id="pos-subtotal" class="font-mono font-bold text-white text-sm">$0.00</span>
+            </div>
+
+            <!-- Discount Engine -->
+            <div class="flex items-center justify-between gap-2">
+                <span class="text-slate-400 shrink-0" data-i18n="discount_label">Discount:</span>
+                <div class="flex items-center gap-1.5">
+                    <button onclick="applyPresetDiscount(10)" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-mono">-$10</button>
+                    <button onclick="applyPresetDiscount(20)" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-mono">-$20</button>
+                    <div class="relative w-20">
+                        <span class="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-[11px]">$</span>
+                        <input type="number" id="pos-discount-input" value="0" min="0" 
+                               class="w-full pl-5 pr-1 py-1 rounded bg-slate-950 border border-slate-700 text-right text-amber-400 font-mono text-xs focus:outline-none focus:border-amber-400">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Amount Large -->
+            <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] text-slate-400 uppercase font-mono tracking-wider block" data-i18n="total_payable">Total Payable</span>
+                    <span id="pos-final-total" class="text-2xl font-black text-cyan-400 font-mono">$0.00</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] text-slate-500 font-mono block" data-i18n="in_riel">In Riel (KHR ~4,100)</span>
+                    <span id="pos-khr-total" class="text-xs font-mono font-bold text-slate-300">0 ៛</span>
+                </div>
+            </div>
+
+            <!-- Payment Trigger Button -->
+            <button onclick="openPaymentModal()" id="pos-pay-btn" class="w-full btn-neon py-3.5 rounded-xl font-extrabold text-slate-950 text-sm flex items-center justify-center gap-2">
+                <i data-lucide="credit-card" class="w-4 h-4"></i>
+                <span data-i18n="process_payment_btn">Process Payment ($)</span>
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Serial IMEI Selection Modal -->
+<div id="pos-imei-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-cyan-500/40 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+                <i data-lucide="smartphone" class="w-5 h-5 text-cyan-400"></i>
+                <h4 class="font-bold text-white text-sm" data-i18n="assign_imei_btn">Assign Serial IMEI</h4>
+            </div>
+            <button onclick="closeImeiModal()" class="text-slate-400 hover:text-white">&times;</button>
+        </div>
+        <div class="space-y-1">
+            <h5 id="imei-modal-product-name" class="font-semibold text-xs text-slate-200">iPhone 15 Pro Max</h5>
+            <p class="text-[11px] text-slate-400">Select the exact 15-digit serial IMEI printed on the customer's box:</p>
+        </div>
+        <div id="imei-modal-list" class="max-h-60 overflow-y-auto space-y-2 p-1 font-mono text-xs"></div>
+        <button onclick="confirmImeiSelection()" class="w-full btn-neon py-2.5 rounded-xl font-bold text-slate-950 text-xs">
+            Confirm Selected IMEI
+        </button>
+    </div>
+</div>
+
+<!-- Cashier Payment Processing Modal (Cash / ABA KHQR / Card) -->
+<div id="pos-payment-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-[#0b1120] border border-slate-700 rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl relative">
+        <button onclick="closePaymentModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">&times;</button>
+
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+                <h3 class="text-lg font-bold text-white" data-i18n="complete_order">POS Checkout & Payment</h3>
+                <p class="text-xs text-slate-400" data-i18n="payment_method">Select customer payment method</p>
+            </div>
+            <div class="text-right">
+                <span class="text-[10px] text-slate-400 block font-mono" data-i18n="total_payable">Payable:</span>
+                <span id="modal-payable-amount" class="text-xl font-black text-cyan-400 font-mono">$0.00</span>
+            </div>
+        </div>
+
+        <!-- Payment Method Tabs -->
+        <div class="grid grid-cols-3 gap-2 text-xs">
+            <button onclick="setPosPaymentMethod('CASH')" id="tab-btn-cash" class="py-2.5 rounded-xl font-bold flex flex-col items-center gap-1 border bg-blue-600/30 border-blue-500 text-white transition-all">
+                <i data-lucide="banknote" class="w-4 h-4 text-emerald-400"></i>
+                <span>Cash USD/KHR</span>
+            </button>
+            <button onclick="setPosPaymentMethod('ABA_PAY')" id="tab-btn-aba" class="py-2.5 rounded-xl font-semibold flex flex-col items-center gap-1 border border-slate-800 bg-slate-900 text-slate-300 hover:text-white transition-all">
+                <span class="px-1.5 py-0.2 rounded bg-rose-600 text-white font-extrabold text-[9px]">ABA</span>
+                <span data-i18n="aba_pay_khqr">ABA Pay (KHQR)</span>
+            </button>
+            <button onclick="setPosPaymentMethod('CREDIT_CARD')" id="tab-btn-card" class="py-2.5 rounded-xl font-semibold flex flex-col items-center gap-1 border border-slate-800 bg-slate-900 text-slate-300 hover:text-white transition-all">
+                <i data-lucide="credit-card" class="w-4 h-4 text-blue-400"></i>
+                <span data-i18n="credit_card">Credit Card</span>
+            </button>
+        </div>
+
+        <!-- Cash Tab Panel -->
+        <div id="pay-panel-cash" class="space-y-4 text-xs">
+            <div class="space-y-2">
+                <label class="font-semibold text-slate-300" data-i18n="amount_tendered">Amount Tendered / Received ($):</label>
+                <div class="relative">
+                    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-mono">$</span>
+                    <input type="number" id="pos-cash-received" step="0.01" 
+                           class="w-full pl-8 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-lg font-bold focus:border-cyan-400 focus:outline-none">
+                </div>
+                <!-- Quick Cash Preset Chips -->
+                <div class="flex items-center gap-2 pt-1 font-mono text-xs">
+                    <button onclick="setCashReceivedExact()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">Exact</button>
+                    <button onclick="setCashReceived(20)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">$20</button>
+                    <button onclick="setCashReceived(50)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">$50</button>
+                    <button onclick="setCashReceived(100)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">$100</button>
+                    <button onclick="setCashReceived(1200)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">$1,200</button>
+                </div>
+            </div>
+
+            <!-- Calculated Change Output -->
+            <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between font-mono">
+                <div>
+                    <span class="text-[10px] text-slate-400 block" data-i18n="change_to_return">Change to Return:</span>
+                    <span id="pos-change-usd" class="text-xl font-extrabold text-emerald-400">$0.00</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] text-slate-500 block">In Riel (4,100):</span>
+                    <span id="pos-change-khr" class="text-sm font-bold text-slate-300">0 ៛</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA KHQR Tab Panel -->
+        <div id="pay-panel-aba" class="hidden space-y-3 text-center">
+            <div class="bg-white text-slate-900 rounded-2xl max-w-[280px] mx-auto shadow-2xl overflow-hidden border border-slate-200">
+                <div class="bg-[#e1251b] px-4 py-2 flex items-center justify-between text-white">
+                    <span class="font-black text-sm tracking-wider">KHQR</span>
+                    <span class="text-[10px] font-semibold tracking-wide">BAKONG / ABA PAY</span>
+                </div>
+
+                <div class="p-4 space-y-2">
+                    <div class="text-left border-b border-slate-200 pb-1.5">
+                        <span class="text-[9px] text-slate-500 uppercase block font-semibold">Merchant:</span>
+                        <h4 class="font-extrabold text-xs text-slate-900 leading-tight">BLUE COMPUTER CO., LTD.</h4>
+                    </div>
+
+                    <div class="relative w-48 h-48 mx-auto bg-slate-50 p-2 rounded-xl border border-slate-200 flex items-center justify-center shadow-inner">
+                        <img id="pos-khqr-img" src="" alt="Bakong KHQR" class="w-full h-full object-contain">
+                        <div id="pos-khqr-loading" class="absolute inset-0 bg-white/90 flex flex-col items-center justify-center text-xs text-slate-600 gap-1.5">
+                            <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-cyan-500"></i>
+                            <span>Generating KHQR...</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-1">
+                        <div class="text-xl font-black text-slate-900 font-mono" id="pos-aba-amount">$0.00</div>
+                        <div class="text-[11px] text-slate-500 font-mono font-semibold" id="pos-aba-khr-amount">≈ 0 KHR</div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 px-3 py-2 border-t border-slate-200 flex items-center justify-between text-[10px] font-mono text-slate-500">
+                    <span class="flex items-center gap-1 text-emerald-600 font-bold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                        <span data-i18n="awaiting_scan">Awaiting Scan</span>
+                    </span>
+                    <span><span data-i18n="expires_in">Expires:</span> <b id="pos-khqr-timer" class="text-slate-800">03:00</b></span>
+                </div>
+            </div>
+
+            <div class="space-y-1.5 pt-1">
+                <a id="pos-mobile-scan-link" href="#" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-900/40 hover:bg-blue-800/60 text-cyan-300 text-xs font-semibold border border-blue-700/60 transition-all">
+                    <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+                    <span>Open / Test Customer Mobile Scan Screen</span>
+                    <i data-lucide="external-link" class="w-3 h-3"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Card Tab Panel -->
+        <div id="pay-panel-card" class="hidden space-y-3 text-center py-4 text-xs">
+            <div class="w-12 h-12 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center mx-auto">
+                <i data-lucide="credit-card" class="w-6 h-6"></i>
+            </div>
+            <p class="text-slate-300 font-semibold">Please swipe, tap or insert card into the POS terminal reader.</p>
+        </div>
+
+        <!-- Submit POS Sale Button -->
+        <button onclick="submitPosSale()" id="pos-complete-sale-btn" class="w-full btn-neon py-3.5 rounded-xl font-bold text-slate-950 text-sm flex items-center justify-center gap-2">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span data-i18n="complete_sale_print">Complete Sale & Print Receipt</span>
+        </button>
+    </div>
+</div>
+
+<!-- Thermal Receipt Modal (Printable 80mm) -->
+<div id="thermal-receipt-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="space-y-4 max-w-sm w-full flex flex-col items-center">
+        <div id="thermal-receipt-printable" class="receipt-paper space-y-3 text-slate-900"></div>
+
+        <div class="flex items-center gap-2 w-full max-w-[320px]">
+            <button onclick="window.print()" class="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg">
+                <i data-lucide="printer" class="w-4 h-4"></i>
+                <span>Print Receipt</span>
+            </button>
+            <button onclick="closeReceiptModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">
+                Done / Next Sale
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Daily Shift Ledger Modal -->
+<div id="shift-ledger-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+                <i data-lucide="calculator" class="w-5 h-5 text-amber-400"></i>
+                <h3 class="font-bold text-white text-base" data-i18n="shift_ledger_btn">Cashier Daily Shift Ledger</h3>
+            </div>
+            <button onclick="closeShiftLedgerModal()" class="text-slate-400 hover:text-white">&times;</button>
+        </div>
+
+        <div id="ledger-modal-content" class="space-y-3 text-xs"></div>
+
+        <button onclick="closeShiftLedgerModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">
+            Close Register Summary
+        </button>
+    </div>
+</div>
+
+<!-- Online Orders In-Store Fulfillment Drawer -->
+<div id="fulfillment-drawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-slate-900/95 border-l border-cyan-500/40 backdrop-blur-xl shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <i data-lucide="truck" class="w-5 h-5 text-cyan-400"></i>
+            <h3 class="font-bold text-white text-base" data-i18n="online_orders_btn">In-Store Online Order Packing</h3>
+        </div>
+        <button onclick="toggleFulfillmentDrawer()" class="text-slate-400 hover:text-white">&times;</button>
+    </div>
+
+    <div id="fulfillment-orders-list" class="flex-1 overflow-y-auto p-5 space-y-4"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/pos.js"></script>
+{% endblock %}

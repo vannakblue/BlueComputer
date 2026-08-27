@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}Blue Computer - Live Order Tracking (Phnom Penh){% endblock %}
+
+{% block content %}
+<div class="flex-1 max-w-4xl w-full mx-auto px-4 py-8 space-y-6">
+
+    <!-- Search / Lookup Bar -->
+    <div class="glass-panel p-6 rounded-3xl border border-slate-800 space-y-4">
+        <div class="text-center space-y-1">
+            <h2 class="text-2xl font-extrabold text-white" data-i18n="track_title">Live Order Tracking</h2>
+            <p class="text-xs text-slate-400" data-i18n="track_desc">Track your smartphone delivery status from our Phnom Penh store in real time.</p>
+        </div>
+
+        <div class="flex items-center gap-2 max-w-md mx-auto">
+            <input type="text" id="track-input" value="{{ order_number }}" 
+                   data-i18n-placeholder="track_placeholder"
+                   placeholder="Enter Order Number (e.g. BC-260827-XXXX)" 
+                   class="flex-1 px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 font-mono text-sm text-cyan-300 placeholder-slate-500 focus:border-cyan-400 focus:outline-none">
+            <button onclick="lookupOrder()" class="btn-neon px-5 py-3 rounded-xl font-bold text-slate-950 text-xs flex items-center gap-1.5 shrink-0">
+                <i data-lucide="search" class="w-4 h-4"></i>
+                <span data-i18n="track_btn">Track</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Tracking Result Display Container -->
+    <div id="tracking-result-container" class="glass-panel p-6 md:p-8 rounded-3xl border border-slate-800 space-y-6 {% if not order_number %}hidden{% endif %}">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+            <div>
+                <span class="text-[10px] uppercase font-mono text-slate-400 tracking-wider">Tracking Reference:</span>
+                <h3 id="track-order-num" class="text-xl font-black text-cyan-400 font-mono">BC-XXXX</h3>
+                <p id="track-customer-info" class="text-xs text-slate-300 mt-0.5">Sokha Chan • Phnom Penh</p>
+            </div>
+            <div class="text-left sm:text-right">
+                <span class="text-[10px] text-slate-400 uppercase font-mono block">Current Status:</span>
+                <span id="track-status-pill" class="inline-block px-3 py-1 rounded-full text-xs font-extrabold bg-blue-500/20 text-cyan-300 border border-blue-500/40 mt-1">
+                    Packing in Store
+                </span>
+            </div>
+        </div>
+
+        <!-- 4-Step Visual Progress Timeline -->
+        <div class="py-4">
+            <div class="grid grid-cols-4 gap-2 text-center text-xs relative">
+                <!-- Step 1: Order Placed -->
+                <div id="step-1" class="space-y-2 flex flex-col items-center">
+                    <div class="step-icon w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-lg shadow-blue-500/30">
+                        <i data-lucide="check" class="w-5 h-5"></i>
+                    </div>
+                    <span class="font-bold text-white text-[11px]" data-i18n="step_placed">Order Placed</span>
+                    <span class="text-[10px] text-slate-500">Verified</span>
+                </div>
+
+                <!-- Step 2: In-Store Packing -->
+                <div id="step-2" class="space-y-2 flex flex-col items-center">
+                    <div class="step-icon w-10 h-10 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold">
+                        <i data-lucide="package" class="w-5 h-5"></i>
+                    </div>
+                    <span class="font-bold text-slate-400 text-[11px]" data-i18n="step_packing">Store Packing</span>
+                    <span class="text-[10px] text-slate-500">Assign IMEI</span>
+                </div>
+
+                <!-- Step 3: Out for Delivery -->
+                <div id="step-3" class="space-y-2 flex flex-col items-center">
+                    <div class="step-icon w-10 h-10 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold">
+                        <i data-lucide="truck" class="w-5 h-5"></i>
+                    </div>
+                    <span class="font-bold text-slate-400 text-[11px]" data-i18n="step_rider">Express Rider</span>
+                    <span class="text-[10px] text-slate-500">1-Hour Transit</span>
+                </div>
+
+                <!-- Step 4: Delivered -->
+                <div id="step-4" class="space-y-2 flex flex-col items-center">
+                    <div class="step-icon w-10 h-10 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold">
+                        <i data-lucide="home" class="w-5 h-5"></i>
+                    </div>
+                    <span class="font-bold text-slate-400 text-[11px]" data-i18n="step_delivered">Delivered</span>
+                    <span class="text-[10px] text-slate-500">Completed</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Summary in Order -->
+        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
+            <h5 class="font-bold text-white">Order Items:</h5>
+            <div id="track-items-list" class="space-y-1 text-slate-300"></div>
+            <div class="pt-2 border-t border-slate-800 flex justify-between font-mono font-bold text-sm text-cyan-400">
+                <span data-i18n="total_amount">Total Amount:</span>
+                <span id="track-total">$0.00</span>
+            </div>
+        </div>
+
+        <!-- Store Help Contact -->
+        <div class="p-4 rounded-2xl bg-blue-950/30 border border-blue-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-blue-600/20 text-cyan-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="headset" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <span class="font-bold text-white block" data-i18n="support_help">Need assistance with your delivery?</span>
+                    <span class="text-slate-400 text-[11px]">Blue Computer Support Hotline & Telegram</span>
+                </div>
+            </div>
+            <a href="tel:+85512888999" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 font-mono font-bold text-center">
+                +855 12 888 999
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderNumFromUrl = '{{ order_number }}' || urlParams.get('order');
+        if (orderNumFromUrl) {
+            document.getElementById('track-input').value = orderNumFromUrl;
+            lookupOrder();
+        }
+    });
+
+    async function lookupOrder() {
+        const orderNumber = document.getElementById('track-input').value.trim();
+        if (!orderNumber) {
+            showToast('Please enter an order number', 'warning');
+            return;
+        }
+
+        const container = document.getElementById('tracking-result-container');
+        try {
+            const res = await fetch(`/api/ecommerce/track/${encodeURIComponent(orderNumber)}/`);
+            if (!res.ok) throw new Error('Order not found. Please check the order number.');
+
+            const o = await res.json();
+            renderOrderTracking(o);
+            if (container) container.classList.remove('hidden');
+        } catch (e) {
+            showToast(e.message, 'error');
+        }
+    }
+
+    function renderOrderTracking(order) {
+        document.getElementById('track-order-num').innerText = order.order_number;
+        document.getElementById('track-customer-info').innerText = `${order.customer_name} • ${order.delivery_district || order.delivery_city}, ${order.delivery_address || ''}`;
+        document.getElementById('track-status-pill').innerText = order.fulfillment_status;
+        document.getElementById('track-total').innerText = `$${parseFloat(order.total_amount).toFixed(2)}`;
+
+        const itemsList = document.getElementById('track-items-list');
+        if (itemsList) {
+            itemsList.innerHTML = (order.items || []).map(it => `
+                <div class="flex justify-between py-1 border-b border-slate-900">
+                    <span>${it.quantity}x ${it.product_name}</span>
+                    <span class="font-mono">$${parseFloat(it.total_price).toFixed(2)}</span>
+                </div>
+            `).join('');
+        }
+
+        const status = order.fulfillment_status;
+        setStepActive('step-1', true);
+        setStepActive('step-2', status === 'PACKING' || status === 'OUT_FOR_DELIVERY' || status === 'COMPLETED');
+        setStepActive('step-3', status === 'OUT_FOR_DELIVERY' || status === 'COMPLETED');
+        setStepActive('step-4', status === 'COMPLETED');
+        lucide.createIcons();
+    }
+
+    function setStepActive(stepId, isActive) {
+        const step = document.getElementById(stepId);
+        if (!step) return;
+        const iconDiv = step.querySelector('.step-icon');
+        const text = step.querySelector('span');
+        if (isActive) {
+            iconDiv.className = 'step-icon w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-lg shadow-blue-500/30';
+            text.className = 'font-bold text-white text-[11px]';
+        } else {
+            iconDiv.className = 'step-icon w-10 h-10 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold';
+            text.className = 'font-bold text-slate-500 text-[11px]';
+        }
+    }
+</script>
+{% endblock %}

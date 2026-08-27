@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="km" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Blue Computer - Omnichannel Mobile Retail & POS (Phnom Penh){% endblock %}</title>
+    <meta name="description" content="Blue Computer - Official Flagship Apple, Samsung, Xiaomi Smartphone & Tech Retailer in Phnom Penh.">
+    
+    <!-- Google Fonts: Kantumruy Pro (Khmer) + Plus Jakarta Sans + JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons & Tailwind Play CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef8ff',
+                            100: '#d8eeff',
+                            200: '#b9e0ff',
+                            300: '#89ccff',
+                            400: '#52adff',
+                            500: '#2b8aff',
+                            600: '#146bf5',
+                            700: '#0d53e1',
+                            800: '#1144b6',
+                            900: '#133b8f',
+                            950: '#0c2253',
+                            cyan: '#00f2fe',
+                            electric: '#4facfe',
+                            khqr: '#e1251b',
+                        },
+                        dark: {
+                            900: '#070b14',
+                            850: '#0b1120',
+                            800: '#0f172a',
+                            750: '#141e33',
+                            700: '#1e293b',
+                            600: '#334155'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Kantumruy Pro"', '"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="/static/css/main.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-[#070b14] text-slate-100 font-sans min-h-screen flex flex-col selection:bg-cyan-500 selection:text-black">
+
+    <!-- Top Global App Bar / Switcher -->
+    <header class="sticky top-0 z-40 bg-[#0b1120]/95 backdrop-blur-md border-b border-slate-800/80 px-4 lg:px-8 py-2.5 transition-all">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
+            <!-- Brand Logo -->
+            <a href="/" class="flex items-center gap-3 group shrink-0">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-cyan-500 to-indigo-500 p-0.5 shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
+                    <div class="w-full h-full bg-[#070b14] rounded-[10px] flex items-center justify-center">
+                        <i data-lucide="smartphone" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-extrabold tracking-tight text-lg text-white group-hover:text-cyan-400 transition-colors">BLUE</span>
+                        <span class="font-light text-lg text-cyan-400">COMPUTER</span>
+                        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/30 text-blue-400 uppercase tracking-wider">OmniPOS</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400" data-i18n="phnom_penh_store">Phnom Penh Retail & Online Store</p>
+                </div>
+            </a>
+
+            <!-- System Role Switcher Tabs -->
+            <nav class="hidden md:flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
+                <a href="/" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all {% if request.path == '/' %}bg-blue-600 text-white shadow-md shadow-blue-600/30{% else %}text-slate-400 hover:text-slate-200 hover:bg-slate-800{% endif %}">
+                    <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+                    <span data-i18n="nav_ecommerce">E-Commerce Store</span>
+                </a>
+                <a href="/pos/" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all {% if request.path == '/pos/' %}bg-blue-600 text-white shadow-md shadow-blue-600/30{% else %}text-slate-400 hover:text-slate-200 hover:bg-slate-800{% endif %}">
+                    <i data-lucide="scan-line" class="w-3.5 h-3.5 text-cyan-400"></i>
+                    <span data-i18n="nav_pos">In-Store POS</span>
+                    <span id="pos-fulfillment-badge" class="hidden px-1.5 py-0.2 rounded-full text-[9px] bg-red-500 text-white animate-pulse">0</span>
+                </a>
+                <a href="/admin-portal/" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all {% if request.path == '/admin-portal/' %}bg-blue-600 text-white shadow-md shadow-blue-600/30{% else %}text-slate-400 hover:text-slate-200 hover:bg-slate-800{% endif %}">
+                    <i data-lucide="boxes" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span data-i18n="nav_inventory">Inventory & Ledger</span>
+                </a>
+                <a href="/track/" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all {% if '/track/' in request.path %}bg-blue-600 text-white shadow-md shadow-blue-600/30{% else %}text-slate-400 hover:text-slate-200 hover:bg-slate-800{% endif %}">
+                    <i data-lucide="truck" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    <span data-i18n="nav_tracking">Order Tracking</span>
+                </a>
+            </nav>
+
+            <!-- Right Controls: Bilingual Switcher, Live Sync Indicator & Actions -->
+            <div class="flex items-center gap-2.5">
+                <!-- Language Switcher Button (Khmer 🇰🇭 / English 🇬🇧) -->
+                <div class="flex items-center bg-slate-900 border border-slate-700/80 p-0.5 rounded-xl text-xs">
+                    <button onclick="setLanguage('km')" id="lang-btn-km" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 flex items-center gap-1.5 shadow-sm transition-all" title="ភាសាខ្មែរ">
+                        <span>🇰🇭</span>
+                        <span class="font-bold">ខ្មែរ</span>
+                    </button>
+                    <button onclick="setLanguage('en')" id="lang-btn-en" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 transition-all" title="English">
+                        <span>🇬🇧</span>
+                        <span>EN</span>
+                    </button>
+                </div>
+
+                <!-- Live Synced Indicator -->
+                <div class="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-950/40 border border-emerald-800/40 text-emerald-400 text-xs font-mono">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="text-[11px] font-semibold" data-i18n="nav_live_synced">Live Synced</span>
+                </div>
+
+                {% block header_actions %}{% endblock %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 w-full flex flex-col">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Toast Notifications Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 pointer-events-none"></div>
+
+    <!-- Audio notification element for online orders in POS -->
+    <audio id="order-alert-sound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="/static/js/i18n.js"></script>
+    <script src="/static/js/live_sync.js"></script>
+    <script>
+        lucide.createIcons();
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-emerald-900/90 border-emerald-500/50 text-emerald-100 shadow-emerald-900/40',
+                error: 'bg-rose-900/90 border-rose-500/50 text-rose-100 shadow-rose-900/40',
+                info: 'bg-blue-900/90 border-blue-500/50 text-blue-100 shadow-blue-900/40',
+                warning: 'bg-amber-900/90 border-amber-500/50 text-amber-100 shadow-amber-900/40',
+            };
+            const iconName = type === 'success' ? 'check-circle' : (type === 'error' ? 'alert-circle' : 'info');
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-lg shadow-xl text-xs font-medium transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto max-w-sm ${colors[type] || colors.info}`;
+            toast.innerHTML = `
+                <i data-lucide="${iconName}" class="w-4 h-4 shrink-0"></i>
+                <span class="flex-1">${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-white/60 hover:text-white">&times;</button>
+            `;
+            container.appendChild(toast);
+            lucide.createIcons({ root: toast });
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-x-4');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
