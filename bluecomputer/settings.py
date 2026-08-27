@@ -56,13 +56,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'bluecomputer.wsgi.application'
 
+import os
+import dj_database_url
+
 # Database
-# Default: SQLite (portable, reliable). Can easily switch to PostgreSQL via env vars.
+# Default: SQLite on local machine. Automatically switches to PostgreSQL if DATABASE_URL is set on Render/Railway.
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        conn_max_age=600
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
